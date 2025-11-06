@@ -124,8 +124,5 @@ echo -e "${GREEN}Haiku Model:${NC}   ${BOLD}$ANTHROPIC_DEFAULT_HAIKU_MODEL${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
 
 # Run claude CLI
-# You can use:
-# claude --model opus 
-# claude --model sonnet 
-# claude --model haiku
+
 claude

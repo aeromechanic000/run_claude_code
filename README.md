@@ -22,6 +22,7 @@ A bash script to run [Claude Code](https://github.com/anthropics/anthropic-quick
 | MiniMax | MiniMax-M2, MiniMax-M2-Stable | https://api.minimax.io/anthropic |
 | DeepSeek | deepseek-chat | https://api.deepseek.com/anthropic |
 | Qwen | qwen3-max, qwen3-plus | https://dashscope.aliyuncs.com/apps/anthropic |
+| DOUBAO | doubao-seed-code-preview-latest | https://ark.cn-beijing.volces.com/api/coding |
 
 ## Prerequisites
 
@@ -96,6 +97,7 @@ export KIMI_API_KEY=your_kimi_api_key_here
 export MINIMAX_API_KEY=your_minimax_api_key_here
 export DEEPSEEK_API_KEY=your_deepseek_api_key_here
 export QWEN_API_KEY=your_qwen_api_key_here
+export DOUBAO_API_KEY=your_doubao_api_key_here
 ```
 
 #### Method 2: Permanent (Recommended)
@@ -110,6 +112,7 @@ echo 'export KIMI_API_KEY=your_kimi_api_key_here' >> ~/.bashrc
 echo 'export MINIMAX_API_KEY=your_minimax_api_key_here' >> ~/.bashrc
 echo 'export DEEPSEEK_API_KEY=your_deepseek_api_key_here' >> ~/.bashrc
 echo 'export QWEN_API_KEY=your_qwen_api_key_here' >> ~/.bashrc
+echo 'export DOUBAO_API_KEY=your_doubao_api_key_here' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -121,6 +124,7 @@ echo 'export KIMI_API_KEY=your_kimi_api_key_here' >> ~/.zshrc
 echo 'export MINIMAX_API_KEY=your_minimax_api_key_here' >> ~/.zshrc
 echo 'export DEEPSEEK_API_KEY=your_deepseek_api_key_here' >> ~/.zshrc
 echo 'export QWEN_API_KEY=your_qwen_api_key_here' >> ~/.zshrc
+echo 'export DOUBAO_API_KEY=your_doubao_api_key_here' >> ~/.zshrc
 source ~/.zshrc
 ```
 
@@ -135,6 +139,7 @@ KIMI_API_KEY=your_kimi_api_key_here
 MINIMAX_API_KEY=your_minimax_api_key_here
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 QWEN_API_KEY=your_qwen_api_key_here
+DOUBAO_API_KEY=your_doubao_api_key_here
 EOF
 ```
 

@@ -3,7 +3,7 @@
 **Contact with me on X**: [@aeromechan71402](https://x.com/aeromechan71402)
 
 
-A bash script to run [Claude Code](https://github.com/anthropics/anthropic-quickstarts/tree/main/claude-code) with multiple API providers including GLM, Kimi, MiniMax, DeepSeek, and Qwen.
+A bash script to run [Claude Code](https://github.com/anthropics/anthropic-quickstarts/tree/main/claude-code) with multiple API providers including GLM, Kimi, MiniMax, DeepSeek, Qwen and Doubao.
 
 ## Features
 

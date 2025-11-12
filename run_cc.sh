@@ -35,7 +35,7 @@ GLM_LITE_MODEL=GLM-4.5-Air
 # KIMI: You need to set you API key in your environment variable, e.g. KIMI_API_KEY=xxx-xxx-xxx-xxx
 
 KIMI_BASE_URL==https://api.moonshot.cn/anthropic/
-KIMI_PRIMARY_MODEL=kimi-k2-0905-preview
+KIMI_PRIMARY_MODEL=kimi-k2-thinking
 KIMI_SECONDARY_MODEL=kimi-k2-0905-preview
 KIMI_LITE_MODEL=kimi-latest-32k
 
@@ -60,6 +60,11 @@ QWEN_PRIMARY_MODEL=qwen3-max
 QWEN_SECONDARY_MODEL=qwen3-max
 QWEN_LITE_MODEL=qwen3-plus
 
+DOUBAO_BASE_URL=https://ark.cn-beijing.volces.com/api/coding
+DOUBAO_PRIMARY_MODEL=doubao-seed-code-preview-latest
+DOUBAO_SECONDARY_MODEL=doubao-seed-code-preview-latest
+DOUBAO_LITE_MODEL=doubao-seed-code-preview-latest
+
 # Set provider from argument or default to GLM
 CC_PROVIDER=${1:-GLM}
 
@@ -68,13 +73,13 @@ CC_PROVIDER=$(echo "$CC_PROVIDER" | tr '[:lower:]' '[:upper:]')
 
 # Validate provider
 case "$CC_PROVIDER" in
-    GLM|KIMI|QWEN|DEEPSEEK|MINIMAX)
+    GLM|KIMI|QWEN|DEEPSEEK|MINIMAX|DOUBAO)
         echo "Starting with $CC_PROVIDER provider..."
         ;;
     *)
         echo "Error: Unknown provider '$CC_PROVIDER'"
         echo "Usage: $0 [PROVIDER]"
-        echo "Supported providers: GLM, KIMI, QWEN, DEEPSEEK, MINIMAX"
+        echo "Supported providers: GLM, KIMI, QWEN, DEEPSEEK, MINIMAX, DOUBAO"
         exit 1
         ;;
 esac
@@ -124,5 +129,8 @@ echo -e "${GREEN}Haiku Model:${NC}   ${BOLD}$ANTHROPIC_DEFAULT_HAIKU_MODEL${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
 
 # Run claude CLI
-
+# You can use:
+# claude --model opus 
+# claude --model sonnet 
+# claude --model haiku
 claude

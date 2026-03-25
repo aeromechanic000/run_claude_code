@@ -14,6 +14,7 @@ NC='\033[0m'
 CC_PROVIDER="MEGREZ"
 ENABLE_TEAMS=0
 AUTO_MODE=0
+EXTRA_ARGS=""
 
 # --- Provider Configurations ---
 MEGREZ_BASE_URL=https://enhance.megrez.plus/api/code
@@ -99,13 +100,13 @@ else
     TEAM_STATUS="${RED}Disabled${NC}"
 fi
 
-# Toggle Auto Mode
+# Prepare CLI Flags (Instead of Environment Variables)
 if [ "$AUTO_MODE" -eq 1 ]; then
-    export CLAUDE_CODE_PERMISSION_MODE=auto
-    AUTO_STATUS="${GREEN}Enabled (Full Auto)${NC}"
+    EXTRA_ARGS="--enable-auto-mode"
+    AUTO_STATUS="${GREEN}Enabled (Flag: --enable-auto-mode)${NC}"
 else
-    unset CLAUDE_CODE_PERMISSION_MODE
-    AUTO_STATUS="${YELLOW}Disabled (Manual)${NC}"
+    EXTRA_ARGS=""
+    AUTO_STATUS="${YELLOW}Disabled${NC}"
 fi
 
 # --- API Key Check ---
@@ -136,5 +137,5 @@ else
 fi
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
 
-# Execute Claude CLI
-claude
+# Execute Claude CLI with flags
+claude $EXTRA_ARGS

@@ -1,19 +1,4 @@
-#! /bin/bash
-
-# Install the Claude CLI tool:
-# npm install -g @anthropic-ai/claude-code
-
-# Fix the connection issue to claude.com and docs.claude.com: 
-# 1. Add following lines to `/private/etc/hosts` (without the # at the beginning) :
-# 34.162.46.92    claude.com  
-# 34.162.102.82   claude.com  
-# 34.162.136.91   claude.com  
-# 34.162.142.92   claude.com  
-# 34.162.183.95   claude.com  
-# 160.79.104.10   docs.claude.com  
-
-# 2. Then flush the DNS cache:
-# sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+#!/bin/bash
 
 # Color definitions
 RED='\033[0;31m'
@@ -23,68 +8,76 @@ BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# GLM: You need to set you API key in your environment variable, e.g. GLM_API_KEY=xxx-xxx-xxx-xxx
+# Default Settings
+CC_PROVIDER="MEGREZ"
+ENABLE_TEAMS=0
+AUTO_MODE=0
+
+# --- Provider Configurations ---
+MEGREZ_BASE_URL=https://enhance.megrez.plus/api/code
+MEGREZ_PRIMARY_MODEL=code
+MEGREZ_SECONDARY_MODEL=code
+MEGREZ_LITE_MODEL=code
 
 GLM_BASE_URL=https://api.z.ai/api/anthropic
-GLM_PRIMARY_MODEL=GLM-4.6
-GLM_SECONDARY_MODEL=GLM-4.6
-GLM_LITE_MODEL=GLM-4.5-Air
+GLM_PRIMARY_MODEL=GLM-5
+GLM_SECONDARY_MODEL=GLM-5
+GLM_LITE_MODEL=GLM-4.7
 
-# KIMI: You need to set you API key in your environment variable, e.g. KIMI_API_KEY=xxx-xxx-xxx-xxx
+KIMI_BASE_URL=https://api.kimi.com/coding/
+KIMI_PRIMARY_MODEL=kimi-for-coding
+KIMI_SECONDARY_MODEL=kimi-for-coding
+KIMI_LITE_MODEL=kimi-for-coding
 
-KIMI_BASE_URL==https://api.moonshot.cn/anthropic/
-KIMI_PRIMARY_MODEL=kimi-k2-thinking
-KIMI_SECONDARY_MODEL=kimi-k2-0905-preview
-KIMI_LITE_MODEL=kimi-latest-32k
-
-# MiniMax: You need to set you API key in your environment variable, e.g. MINIMAX_API_KEY=xxx-xxx-xxx-xxx
-
-MINIMAX_BASE_URL==https://api.minimax.io/anthropic
-MINIMAX_PRIMARY_MODEL=MiniMax-M2
-MINIMAX_SECONDARY_MODEL=MiniMax-M2
+MINIMAX_BASE_URL=https://api.minimax.io/anthropic
+MINIMAX_PRIMARY_MODEL=MiniMax-M2.1
+MINIMAX_SECONDARY_MODEL=MiniMax-M2.1
 MINIMAX_LITE_MODEL=MiniMax-M2-Stable
-
-# DeepSeek: You need to set you API key in your environment variable, e.g. DEEPSEEK_API_KEY=xxx-xxx-xxx-xxx
 
 DEEPSEEK_BASE_URL=https://api.deepseek.com/anthropic
 DEEPSEEK_PRIMARY_MODEL=deepseek-chat
 DEEPSEEK_SECONDARY_MODEL=deepseek-chat
 DEEPSEEK_LITE_MODEL=deepseek-chat
 
-# Qwen: You need to set you API key in your environment variable, e.g. QWEN_API_KEY=xxx-xxx-xxx-xxx
-
-QWEN_BASE_URL=https://dashscope.aliyuncs.com/apps/anthropic
-QWEN_PRIMARY_MODEL=qwen3-max
-QWEN_SECONDARY_MODEL=qwen3-max
-QWEN_LITE_MODEL=qwen3-plus
+QWENCODE_BASE_URL=https://dashscope.aliyuncs.com/apps/anthropic
+QWENCODE_PRIMARY_MODEL=qwen3.5-plus
+QWENCODE_SECONDARY_MODEL=qwen3.5-plus
+QWENCODE_LITE_MODEL=qwen3.5-plus
 
 DOUBAO_BASE_URL=https://ark.cn-beijing.volces.com/api/coding
 DOUBAO_PRIMARY_MODEL=doubao-seed-code-preview-latest
 DOUBAO_SECONDARY_MODEL=doubao-seed-code-preview-latest
 DOUBAO_LITE_MODEL=doubao-seed-code-preview-latest
 
-# Set provider from argument or default to GLM
-CC_PROVIDER=${1:-GLM}
+# --- Argument Parsing ---
+usage() {
+    echo "Usage: $0 [-p PROVIDER] [--team] [--auto]"
+    echo "Providers: MEGREZ, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
+    exit 1
+}
 
-# Convert to uppercase for consistency
+# Loop to handle arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -p) CC_PROVIDER="$2"; shift ;;
+        --team) ENABLE_TEAMS=1 ;;
+        --auto) AUTO_MODE=1 ;;
+        -h|--help) usage ;;
+        *) echo -e "${RED}Unknown parameter: $1${NC}"; usage ;;
+    esac
+    shift
+done
+
 CC_PROVIDER=$(echo "$CC_PROVIDER" | tr '[:lower:]' '[:upper:]')
 
-# Validate provider
+# --- Validation & Env Setup ---
 case "$CC_PROVIDER" in
-    GLM|KIMI|QWEN|DEEPSEEK|MINIMAX|DOUBAO)
-        echo "Starting with $CC_PROVIDER provider..."
-        ;;
-    *)
-        echo "Error: Unknown provider '$CC_PROVIDER'"
-        echo "Usage: $0 [PROVIDER]"
-        echo "Supported providers: GLM, KIMI, QWEN, DEEPSEEK, MINIMAX, DOUBAO"
-        exit 1
-        ;;
+    MEGREZ|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
+    *) echo -e "${RED}Error: Unknown provider '$CC_PROVIDER'${NC}"; usage ;;
 esac
 
-# Use variable indirection to set environment variables
 BASE_URL_VAR="${CC_PROVIDER}_BASE_URL"
 API_KEY_VAR="${CC_PROVIDER}_API_KEY"
 PRIMARY_MODEL_VAR="${CC_PROVIDER}_PRIMARY_MODEL"
@@ -97,40 +90,51 @@ export ANTHROPIC_DEFAULT_OPUS_MODEL=${!PRIMARY_MODEL_VAR}
 export ANTHROPIC_DEFAULT_SONNET_MODEL=${!SECONDARY_MODEL_VAR}
 export ANTHROPIC_DEFAULT_HAIKU_MODEL=${!LITE_MODEL_VAR}
 
-# Check if API key is set BEFORE displaying configuration
+# Toggle Agent Teams
+if [ "$ENABLE_TEAMS" -eq 1 ]; then
+    export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+    TEAM_STATUS="${GREEN}Enabled${NC}"
+else
+    unset CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
+    TEAM_STATUS="${RED}Disabled${NC}"
+fi
+
+# Toggle Auto Mode
+if [ "$AUTO_MODE" -eq 1 ]; then
+    export CLAUDE_CODE_PERMISSION_MODE=auto
+    AUTO_STATUS="${GREEN}Enabled (Full Auto)${NC}"
+else
+    unset CLAUDE_CODE_PERMISSION_MODE
+    AUTO_STATUS="${YELLOW}Disabled (Manual)${NC}"
+fi
+
+# --- API Key Check ---
 if [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
-    echo -e "\n${RED}═══════════════════════════════════════════════════════${NC}"
-    echo -e "${RED}✗ ERROR: API Key Not Found${NC}"
-    echo -e "${RED}═══════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}The ${BOLD}${API_KEY_VAR}${NC}${YELLOW} environment variable is not set.${NC}\n"
-    echo -e "${CYAN}Please set your API key using one of these methods:${NC}\n"
-    echo -e "${GREEN}1. Temporary (current session only):${NC}"
-    echo -e "   ${BOLD}export ${API_KEY_VAR}=your_api_key_here${NC}\n"
-    echo -e "${GREEN}2. Permanent (add to ~/.bashrc or ~/.zshrc):${NC}"
-    echo -e "   ${BOLD}echo 'export ${API_KEY_VAR}=your_api_key_here' >> ~/.bashrc${NC}"
-    echo -e "   ${BOLD}source ~/.bashrc${NC}\n"
-    echo -e "${GREEN}3. Using .env file:${NC}"
-    echo -e "   ${BOLD}echo '${API_KEY_VAR}=your_api_key_here' >> .env${NC}"
-    echo -e "   ${BOLD}source .env${NC}\n"
-    echo -e "${RED}═══════════════════════════════════════════════════════${NC}\n"
+    echo -e "\n${RED}✗ ERROR: API Key Not Found for $CC_PROVIDER${NC}"
+    echo -e "${YELLOW}Please set: export ${API_KEY_VAR}=your_key${NC}\n"
     exit 1
 fi
 
-# Display configuration with colors
+# --- Status Display ---
+
 echo -e "\n${BLUE}═══════════════════════════════════════════════════════${NC}"
-echo -e "${CYAN}🚀 Configuration${NC}"
+echo -e "${CYAN}🚀 Claude CLI Wrapper | Agent Status${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}Provider:${NC}      ${YELLOW}$CC_PROVIDER${NC}"
-echo -e "${GREEN}API Key:${NC}       ${GREEN}✓ Set${NC}"
+echo -e "${GREEN}Agent Teams:${NC}   $TEAM_STATUS"
+echo -e "${GREEN}Auto Mode:${NC}     $AUTO_STATUS"
 echo -e "${GREEN}Base URL:${NC}      ${MAGENTA}$ANTHROPIC_BASE_URL${NC}"
-echo -e "${GREEN}Opus Model:${NC}    ${BOLD}$ANTHROPIC_DEFAULT_OPUS_MODEL${NC}"
-echo -e "${GREEN}Sonnet Model:${NC}  ${BOLD}$ANTHROPIC_DEFAULT_SONNET_MODEL${NC}"
-echo -e "${GREEN}Haiku Model:${NC}   ${BOLD}$ANTHROPIC_DEFAULT_HAIKU_MODEL${NC}"
+
+# Logic to show if models are unified or distinct
+if [ "$ANTHROPIC_DEFAULT_OPUS_MODEL" == "$ANTHROPIC_DEFAULT_SONNET_MODEL" ] && \
+   [ "$ANTHROPIC_DEFAULT_SONNET_MODEL" == "$ANTHROPIC_DEFAULT_HAIKU_MODEL" ]; then
+    echo -e "${GREEN}Model Mode:${NC}    ${BOLD}Unified (${ANTHROPIC_DEFAULT_SONNET_MODEL})${NC}"
+else
+    echo -e "${GREEN}Opus Model:${NC}    ${BOLD}$ANTHROPIC_DEFAULT_OPUS_MODEL${NC}"
+    echo -e "${GREEN}Sonnet Model:${NC}  ${BOLD}$ANTHROPIC_DEFAULT_SONNET_MODEL${NC}"
+    echo -e "${GREEN}Haiku Model:${NC}   ${BOLD}$ANTHROPIC_DEFAULT_HAIKU_MODEL${NC}"
+fi
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
 
-# Run claude CLI
-# You can use:
-# claude --model opus 
-# claude --model sonnet 
-# claude --model haiku
+# Execute Claude CLI
 claude

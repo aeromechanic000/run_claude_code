@@ -1,9 +1,13 @@
-# --- Configuration ---
-$DefaultProvider = "MEGREZ"
-$EnableTeams = $false
-$AutoMode = $false
+# --- 颜色与样式定义 ---
+$Colors = @{
+    Info    = "Cyan"
+    Success = "Green"
+    Warn    = "Yellow"
+    Error   = "Red"
+    Accent  = "Magenta"
+}
 
-# --- Provider Configurations ---
+# --- API 提供商配置库 ---
 $Providers = @{
     "MEGREZ" = @{
         BaseUrl = "https://enhance.megrez.plus/api/code"
@@ -13,7 +17,7 @@ $Providers = @{
         BaseUrl = "https://openrouter.ai/api"
         Primary = "qwen/qwen-3.6-plus:free"
         Secondary = "nvidia/nemotron-3-super:free"
-        Lite = "stepfun/step-3.5-flash:free"
+        Lite    = "stepfun/step-3.5-flash:free"
     }
     "GLM" = @{
         BaseUrl = "https://api.z.ai/api/anthropic"
@@ -39,84 +43,87 @@ $Providers = @{
         BaseUrl = "https://ark.cn-beijing.volces.com/api/coding"
         Primary = "doubao-seed-code-preview-latest"
         Secondary = "doubao-seed-code-preview-latest"
-        Lite = "doubao-seed-code-preview-latest"
+        Lite    = "doubao-seed-code-preview-latest"
     }
 }
 
-# --- Argument Parsing ---
+# --- 参数解析 ---
 param (
-    [Parameter(Mandatory=$false)][string]$p,
+    [Parameter(Mandatory=$false, HelpMessage="指定 API 提供商")]
+    [Alias("provider")]
+    [string]$p = "MEGREZ",
+
+    [Parameter(Mandatory=$false)]
     [switch]$team,
+
+    [Parameter(Mandatory=$false)]
     [switch]$auto
 )
 
-$CC_PROVIDER = if ($p) { $p.ToUpper() } else { $DefaultProvider }
+$CC_PROVIDER = $p.ToUpper()
 
-# --- Validation ---
+# --- 验证提供商 ---
 if (-not $Providers.ContainsKey($CC_PROVIDER)) {
-    Write-Host "Error: Unknown provider '$CC_PROVIDER'" -ForegroundColor Red
-    Write-Host "Available: $($Providers.Keys -join ', ')" -ForegroundColor Yellow
+    Write-Host "❌ 错误: 未知的提供商 '$CC_PROVIDER'" -ForegroundColor $Colors.Error
+    Write-Host "可用列表: $($Providers.Keys -join ', ')" -ForegroundColor $Colors.Warn
     exit 1
 }
 
-# --- Env Setup ---
+# --- 获取环境变量 ---
 $Config = $Providers[$CC_PROVIDER]
 $ApiKeyVar = "${CC_PROVIDER}_API_KEY"
-$ApiKey = [System.Environment]::GetEnvironmentVariable($ApiKeyVar)
+$ApiKey = [System.Environment]::GetEnvironmentVariable($ApiKeyVar, "User") 
+if (-not $ApiKey) { $ApiKey = $env:$ApiKeyVar } # 兼容当前会话变量
 
 if (-not $ApiKey) {
-    Write-Host "`n✗ ERROR: API Key Not Found for $CC_PROVIDER" -ForegroundColor Red
-    Write-Host "Please set it using: `$env:$ApiKeyVar = 'your_key'" -ForegroundColor Yellow
+    Write-Host "`n[!] 缺少 API Key" -ForegroundColor $Colors.Error
+    Write-Host "请先设置环境变量: `$env:$ApiKeyVar = '你的秘钥'" -ForegroundColor $Colors.Warn
     exit 1
 }
 
-# Set Environment Variables for the current process
+# --- 设置 Claude CLI 所需的环境变量 ---
 $env:ANTHROPIC_BASE_URL = $Config.BaseUrl
 $env:ANTHROPIC_AUTH_TOKEN = $ApiKey
-$env:ANTHROPIC_API_KEY = ""
+$env:ANTHROPIC_API_KEY = "" # 置空以绕过官方端点验证
 $env:ANTHROPIC_DEFAULT_OPUS_MODEL = $Config.Primary
 $env:ANTHROPIC_DEFAULT_SONNET_MODEL = $Config.Secondary
 $env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $Config.Lite
 
+# 团队模式处理
 if ($team) {
     $env:CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1"
-    $TeamStatus = "Enabled"
-    $TeamColor = "Green"
+    $TeamStatus = "已启用"
 } else {
     Remove-Item env:CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS -ErrorAction SilentlyContinue
-    $TeamStatus = "Disabled"
-    $TeamColor = "Red"
+    $TeamStatus = "未启用"
 }
 
+# 自动模式处理
 $ExtraArgs = @()
 if ($auto) {
     $ExtraArgs += "--enable-auto-mode"
-    $AutoStatus = "Enabled (Flag: --enable-auto-mode)"
-    $AutoColor = "Green"
+    $AutoStatus = "已开启 (--enable-auto-mode)"
 } else {
-    $AutoStatus = "Disabled"
-    $AutoColor = "Yellow"
+    $AutoStatus = "关闭"
 }
 
-# --- Status Display ---
-Write-Host "`n" + ("=" * 55) -ForegroundColor Blue
-Write-Host "🚀 Claude CLI Wrapper | Agent Status" -ForegroundColor Cyan
-Write-Host ("=" * 55) -ForegroundColor Blue
+# --- 状态展示界面 ---
+Write-Host "`n" + ("=" * 60) -ForegroundColor Blue
+Write-Host " 🚀 Claude CLI Wrapper (PowerShell Edition)" -ForegroundColor $Colors.Info
+Write-Host ("=" * 60) -ForegroundColor Blue
 
-Write-Host "Provider:      " -NoNewline -ForegroundColor Green; Write-Host $CC_PROVIDER -ForegroundColor Yellow
-Write-Host "Agent Teams:   " -NoNewline -ForegroundColor Green; Write-Host $TeamStatus -ForegroundColor $TeamColor
-Write-Host "Auto Mode:     " -NoNewline -ForegroundColor Green; Write-Host $AutoStatus -ForegroundColor $AutoColor
-Write-Host "Base URL:      " -NoNewline -ForegroundColor Green; Write-Host $env:ANTHROPIC_BASE_URL -ForegroundColor Magenta
+Write-Host " 📍 提供商:    " -NoNewline; Write-Host $CC_PROVIDER -ForegroundColor $Colors.Success
+Write-Host " 👥 团队模式:  " -NoNewline; Write-Host $TeamStatus -ForegroundColor ($team ? $Colors.Success : $Colors.Error)
+Write-Host " 🤖 自动模式:  " -NoNewline; Write-Host $AutoStatus -ForegroundColor ($auto ? $Colors.Success : $Colors.Warn)
+Write-Host " 🌐 接口地址:  " -NoNewline; Write-Host $env:ANTHROPIC_BASE_URL -ForegroundColor $Colors.Accent
 
-if ($Config.Primary -eq $Config.Secondary -and $Config.Secondary -eq $Config.Lite) {
-    Write-Host "Model Mode:    " -NoNewline -ForegroundColor Green; Write-Host "Unified ($($Config.Primary))" -ForegroundColor White -BackGroundColor DarkGray
+if ($Config.Primary -eq $Config.Secondary) {
+    Write-Host " 📦 统一模型:  " -NoNewline; Write-Host $Config.Primary -ForegroundColor White
 } else {
-    Write-Host "Opus Model:    " -NoNewline -ForegroundColor Green; Write-Host $Config.Primary -ForegroundColor White
-    Write-Host "Sonnet Model:  " -NoNewline -ForegroundColor Green; Write-Host $Config.Secondary -ForegroundColor White
-    Write-Host "Haiku Model:   " -NoNewline -ForegroundColor Green; Write-Host $Config.Lite -ForegroundColor White
+    Write-Host " 💎 Opus 层级: " -NoNewline; Write-Host $Config.Primary -ForegroundColor White
+    Write-Host " ⚡ Sonnet 层级:" -NoNewline; Write-Host $Config.Secondary -ForegroundColor White
 }
-Write-Host ("=" * 55) + "`n" -ForegroundColor Blue
+Write-Host ("=" * 60) + "`n" -ForegroundColor Blue
 
-# --- Execute Claude CLI ---
-# Using & to call the command with the array of arguments
+# --- 启动 Claude ---
 & claude $ExtraArgs

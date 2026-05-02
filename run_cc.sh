@@ -22,6 +22,12 @@ MEGREZ_PRIMARY_MODEL=code
 MEGREZ_SECONDARY_MODEL=code
 MEGREZ_LITE_MODEL=code
 
+# New: OpenRouter Configuration (May 2026 Free Tier SOTA)
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_PRIMARY_MODEL=qwen/qwen-3.6-plus:free        # Current king of coding tokens
+OPENROUTER_SECONDARY_MODEL=nvidia/nemotron-3-super:free  # Best for complex refactoring
+OPENROUTER_LITE_MODEL=stepfun/step-3.5-flash:free        # Ultra-fast for small edits
+
 GLM_BASE_URL=https://api.z.ai/api/anthropic
 GLM_PRIMARY_MODEL=GLM-5
 GLM_SECONDARY_MODEL=GLM-5
@@ -55,7 +61,7 @@ DOUBAO_LITE_MODEL=doubao-seed-code-preview-latest
 # --- Argument Parsing ---
 usage() {
     echo "Usage: $0 [-p PROVIDER] [--team] [--auto]"
-    echo "Providers: MEGREZ, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
+    echo "Providers: MEGREZ, OPENROUTER, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
     exit 1
 }
 
@@ -75,7 +81,7 @@ CC_PROVIDER=$(echo "$CC_PROVIDER" | tr '[:lower:]' '[:upper:]')
 
 # --- Validation & Env Setup ---
 case "$CC_PROVIDER" in
-    MEGREZ|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
+    MEGREZ|OPENROUTER|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
     *) echo -e "${RED}Error: Unknown provider '$CC_PROVIDER'${NC}"; usage ;;
 esac
 
@@ -100,7 +106,7 @@ else
     TEAM_STATUS="${RED}Disabled${NC}"
 fi
 
-# Prepare CLI Flags (Instead of Environment Variables)
+# Prepare CLI Flags
 if [ "$AUTO_MODE" -eq 1 ]; then
     EXTRA_ARGS="--enable-auto-mode"
     AUTO_STATUS="${GREEN}Enabled (Flag: --enable-auto-mode)${NC}"
@@ -117,7 +123,6 @@ if [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
 fi
 
 # --- Status Display ---
-
 echo -e "\n${BLUE}═══════════════════════════════════════════════════════${NC}"
 echo -e "${CYAN}🚀 Claude CLI Wrapper | Agent Status${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
@@ -126,7 +131,6 @@ echo -e "${GREEN}Agent Teams:${NC}   $TEAM_STATUS"
 echo -e "${GREEN}Auto Mode:${NC}     $AUTO_STATUS"
 echo -e "${GREEN}Base URL:${NC}      ${MAGENTA}$ANTHROPIC_BASE_URL${NC}"
 
-# Logic to show if models are unified or distinct
 if [ "$ANTHROPIC_DEFAULT_OPUS_MODEL" == "$ANTHROPIC_DEFAULT_SONNET_MODEL" ] && \
    [ "$ANTHROPIC_DEFAULT_SONNET_MODEL" == "$ANTHROPIC_DEFAULT_HAIKU_MODEL" ]; then
     echo -e "${GREEN}Model Mode:${NC}    ${BOLD}Unified (${ANTHROPIC_DEFAULT_SONNET_MODEL})${NC}"
@@ -137,5 +141,5 @@ else
 fi
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}\n"
 
-# Execute Claude CLI with flags
+# Execute Claude CLI
 claude $EXTRA_ARGS

@@ -49,7 +49,7 @@ DEEPSEEK_PRIMARY_MODEL=deepseek-chat
 DEEPSEEK_SECONDARY_MODEL=deepseek-chat
 DEEPSEEK_LITE_MODEL=deepseek-chat
 
-QWENCODE_BASE_URL=https://dashscope.aliyuncs.com/apps/anthropic
+QWENCODE_BASE_URL=https://coding.dashscope.aliyuncs.com/apps/anthropic
 QWENCODE_PRIMARY_MODEL=qwen3.5-plus
 QWENCODE_SECONDARY_MODEL=qwen3.5-plus
 QWENCODE_LITE_MODEL=qwen3.5-plus

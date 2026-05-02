@@ -104,7 +104,7 @@ if [ "$ENABLE_TEAMS" -eq 1 ]; then
     TEAM_STATUS="${GREEN}Enabled${NC}"
 else
     unset CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
-    TEAM_STATUS="${RED}Disabled${NC}"
+    TEAM_STATUS="${YELLOW}Disabled${NC}"
 fi
 
 # Prepare CLI Flags

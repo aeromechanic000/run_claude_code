@@ -29,8 +29,8 @@ OPENROUTER_SECONDARY_MODEL=nvidia/nemotron-3-super:free  # Best for complex refa
 OPENROUTER_LITE_MODEL=stepfun/step-3.5-flash:free        # Ultra-fast for small edits
 
 GLM_BASE_URL=https://api.z.ai/api/anthropic
-GLM_PRIMARY_MODEL=GLM-5
-GLM_SECONDARY_MODEL=GLM-5
+GLM_PRIMARY_MODEL=GLM-5.1
+GLM_SECONDARY_MODEL=GLM-5.1
 GLM_LITE_MODEL=GLM-4.7
 
 KIMI_BASE_URL=https://api.kimi.com/coding/

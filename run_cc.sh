@@ -23,11 +23,10 @@ MEGREZ_SECONDARY_MODEL=code
 MEGREZ_LITE_MODEL=code
 # MEGREZ_API_KEY=""
 
-# New: OpenRouter Configuration (May 2026 Free Tier SOTA)
 OPENROUTER_BASE_URL=https://openrouter.ai/api
-OPENROUTER_PRIMARY_MODEL=qwen/qwen-3.6-plus:free        # Current king of coding tokens
-OPENROUTER_SECONDARY_MODEL=nvidia/nemotron-3-super:free  # Best for complex refactoring
-OPENROUTER_LITE_MODEL=stepfun/step-3.5-flash:free        # Ultra-fast for small edits
+OPENROUTER_PRIMARY_MODEL=z-ai/glm-4.5-air:free     
+OPENROUTER_SECONDARY_MODEL=z-ai/glm-4.5-air:free
+OPENROUTER_LITE_MODEL=z-ai/glm-4.5-air:free
 
 GLM_BASE_URL=https://api.z.ai/api/anthropic
 GLM_PRIMARY_MODEL=GLM-5.1

@@ -1,7 +1,3 @@
-I've updated your `README.md` to reflect the transition to the 2026 version of the script. It now includes **OpenRouter** support (the new SOTA for free-tier coding models), **Windows PowerShell** instructions, and the updated argument-based usage.
-
----
-
 # Run Claude Code 🚀
 
 **Contact with me on X**: [@aeromechan71402](https://x.com/aeromechan71402)

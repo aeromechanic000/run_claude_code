@@ -15,9 +15,9 @@ $Providers = @{
     }
     "OPENROUTER" = @{
         BaseUrl = "https://openrouter.ai/api"
-        Primary = "qwen/qwen-3.6-plus:free"
-        Secondary = "nvidia/nemotron-3-super:free"
-        Lite    = "stepfun/step-3.5-flash:free"
+        Primary = "z-ai/glm-4.5-air:free"
+        Secondary = "z-ai/glm-4.5-air:free"
+        Lite    = "z-ai/glm-4.5-air:free"
     }
     "GLM" = @{
         BaseUrl = "https://api.z.ai/api/anthropic"

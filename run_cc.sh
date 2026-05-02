@@ -21,6 +21,7 @@ MEGREZ_BASE_URL=https://enhance.megrez.plus/api/code
 MEGREZ_PRIMARY_MODEL=code
 MEGREZ_SECONDARY_MODEL=code
 MEGREZ_LITE_MODEL=code
+# MEGREZ_API_KEY=""
 
 # New: OpenRouter Configuration (May 2026 Free Tier SOTA)
 OPENROUTER_BASE_URL=https://openrouter.ai/api

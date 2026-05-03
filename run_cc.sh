@@ -21,42 +21,48 @@ MEGREZ_BASE_URL=https://enhance.megrez.plus/api/code
 MEGREZ_PRIMARY_MODEL=code
 MEGREZ_SECONDARY_MODEL=code
 MEGREZ_LITE_MODEL=code
-# MEGREZ_API_KEY=""
 
 OPENROUTER_BASE_URL=https://openrouter.ai/api
-OPENROUTER_PRIMARY_MODEL=z-ai/glm-4.5-air:free     
+OPENROUTER_PRIMARY_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
 OPENROUTER_SECONDARY_MODEL=z-ai/glm-4.5-air:free
-OPENROUTER_LITE_MODEL=z-ai/glm-4.5-air:free
+OPENROUTER_LITE_MODEL=minimax/minimax-m2.5:free
+OPENROUTER_CODE_SUBAGENT_MODEL=minimax/minimax-m2.5:free
 
 GLM_BASE_URL=https://api.z.ai/api/anthropic
 GLM_PRIMARY_MODEL=GLM-5.1
 GLM_SECONDARY_MODEL=GLM-5.1
 GLM_LITE_MODEL=GLM-4.7
+GLM_CODE_SUBAGENT_MODEL=GLM-4.7
 
 KIMI_BASE_URL=https://api.kimi.com/coding/
 KIMI_PRIMARY_MODEL=kimi-for-coding
 KIMI_SECONDARY_MODEL=kimi-for-coding
 KIMI_LITE_MODEL=kimi-for-coding
+KIMI_CODE_SUBAGENT_MODEL=kimi-for-coding
 
 MINIMAX_BASE_URL=https://api.minimax.io/anthropic
 MINIMAX_PRIMARY_MODEL=MiniMax-M2.1
 MINIMAX_SECONDARY_MODEL=MiniMax-M2.1
 MINIMAX_LITE_MODEL=MiniMax-M2-Stable
+MINIMAX_CODE_SUBAGENT_MODEL=MiniMax-M2-Stable
 
 DEEPSEEK_BASE_URL=https://api.deepseek.com/anthropic
 DEEPSEEK_PRIMARY_MODEL=deepseek-chat
 DEEPSEEK_SECONDARY_MODEL=deepseek-chat
 DEEPSEEK_LITE_MODEL=deepseek-chat
+DEEPSEEK_CODE_SUBAGENT_MODEL=deepseek-chat
 
-QWENCODE_BASE_URL=https://coding.dashscope.aliyuncs.com/apps/anthropic
+QWENCODE_BASE_URL=https://dashscope.aliyuncs.com/apps/anthropic
 QWENCODE_PRIMARY_MODEL=qwen3.5-plus
 QWENCODE_SECONDARY_MODEL=qwen3.5-plus
 QWENCODE_LITE_MODEL=qwen3.5-plus
+QWENCODE_CODE_SUBAGENT_MODEL=qwen3.5-plus
 
 DOUBAO_BASE_URL=https://ark.cn-beijing.volces.com/api/coding
-DOUBAO_PRIMARY_MODEL=doubao-seed-code-preview-latest
+DOUBAO_PRIMARY_MODEL=GLM-5.1
 DOUBAO_SECONDARY_MODEL=doubao-seed-code-preview-latest
 DOUBAO_LITE_MODEL=doubao-seed-code-preview-latest
+DOUBAO_CODE_SUBAGENT_MODEL=doubao-seed-code-preview-latest
 
 # --- Argument Parsing ---
 usage() {

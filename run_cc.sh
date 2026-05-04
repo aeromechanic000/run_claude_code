@@ -21,12 +21,25 @@ MEGREZ_BASE_URL=https://enhance.megrez.plus/api/code
 MEGREZ_PRIMARY_MODEL=code
 MEGREZ_SECONDARY_MODEL=code
 MEGREZ_LITE_MODEL=code
+MEGREZ_CODE_SUBAGENT_MODEL=code
 
 OPENROUTER_BASE_URL=https://openrouter.ai/api
-OPENROUTER_PRIMARY_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+OPENROUTER_PRIMARY_MODEL=openai/gpt-oss-120b:free
 OPENROUTER_SECONDARY_MODEL=z-ai/glm-4.5-air:free
 OPENROUTER_LITE_MODEL=minimax/minimax-m2.5:free
 OPENROUTER_CODE_SUBAGENT_MODEL=minimax/minimax-m2.5:free
+
+POLARIS_BASE_URL=http://localhost:11565
+POLARIS_PRIMARY_MODEL=code
+POLARIS_SECONDARY_MODEL=code
+POLARIS_LITE_MODEL=code
+POLARIS_CODE_SUBAGENT_MODEL=code
+
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_PRIMARY_MODEL=qwen3.5:2b
+OLLAMA_SECONDARY_MODEL=qwen3.5:2b
+OLLAMA_LITE_MODEL=qwen3.5:2b
+OLLAMA_CODE_SUBAGENT_MODEL=qwen3.5:2b
 
 GLM_BASE_URL=https://api.z.ai/api/anthropic
 GLM_PRIMARY_MODEL=GLM-5.1
@@ -67,7 +80,7 @@ DOUBAO_CODE_SUBAGENT_MODEL=doubao-seed-code-preview-latest
 # --- Argument Parsing ---
 usage() {
     echo "Usage: $0 [-p PROVIDER] [--team] [--auto]"
-    echo "Providers: MEGREZ, OPENROUTER, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
+    echo "Providers: MEGREZ, POLARIS, OPENROUTER, OLLAMA, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
     exit 1
 }
 
@@ -87,7 +100,7 @@ CC_PROVIDER=$(echo "$CC_PROVIDER" | tr '[:lower:]' '[:upper:]')
 
 # --- Validation & Env Setup ---
 case "$CC_PROVIDER" in
-    MEGREZ|OPENROUTER|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
+    MEGREZ|POLARIS|OPENROUTER|OLLAMA|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
     *) echo -e "${RED}Error: Unknown provider '$CC_PROVIDER'${NC}"; usage ;;
 esac
 
@@ -125,7 +138,7 @@ else
 fi
 
 # --- API Key Check ---
-if [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
+if [ "$CC_PROVIDER" != "OLLAMA" ] && [ "$CC_PROVIDER" != "POLARIS" ] && [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
     echo -e "\n${RED}✗ ERROR: API Key Not Found for $CC_PROVIDER${NC}"
     echo -e "${YELLOW}Please set: export ${API_KEY_VAR}=your_key${NC}\n"
     exit 1

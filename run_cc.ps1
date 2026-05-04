@@ -1,129 +1,156 @@
-# --- 颜色与样式定义 ---
-$Colors = @{
-    Info    = "Cyan"
-    Success = "Green"
-    Warn    = "Yellow"
-    Error   = "Red"
-    Accent  = "Magenta"
-}
+#Requires -Version 5.1
 
-# --- API 提供商配置库 ---
-$Providers = @{
-    "MEGREZ" = @{
-        BaseUrl = "https://enhance.megrez.plus/api/code"
-        Primary = "code"; Secondary = "code"; Lite = "code"
-    }
-    "OPENROUTER" = @{
-        BaseUrl = "https://openrouter.ai/api"
-        Primary = "z-ai/glm-4.5-air:free"
-        Secondary = "z-ai/glm-4.5-air:free"
-        Lite    = "z-ai/glm-4.5-air:free"
-    }
-    "GLM" = @{
-        BaseUrl = "https://api.z.ai/api/anthropic"
-        Primary = "GLM-5"; Secondary = "GLM-5"; Lite = "GLM-4.7"
-    }
-    "KIMI" = @{
-        BaseUrl = "https://api.kimi.com/coding/"
-        Primary = "kimi-for-coding"; Secondary = "kimi-for-coding"; Lite = "kimi-for-coding"
-    }
-    "MINIMAX" = @{
-        BaseUrl = "https://api.minimax.io/anthropic"
-        Primary = "MiniMax-M2.1"; Secondary = "MiniMax-M2.1"; Lite = "MiniMax-M2-Stable"
-    }
-    "DEEPSEEK" = @{
-        BaseUrl = "https://api.deepseek.com/anthropic"
-        Primary = "deepseek-chat"; Secondary = "deepseek-chat"; Lite = "deepseek-chat"
-    }
-    "QWENCODE" = @{
-        BaseUrl = "https://dashscope.aliyuncs.com/apps/anthropic"
-        Primary = "qwen3.5-plus"; Secondary = "qwen3.5-plus"; Lite = "qwen3.5-plus"
-    }
-    "DOUBAO" = @{
-        BaseUrl = "https://ark.cn-beijing.volces.com/api/coding"
-        Primary = "doubao-seed-code-preview-latest"
-        Secondary = "doubao-seed-code-preview-latest"
-        Lite    = "doubao-seed-code-preview-latest"
-    }
-}
-
-# --- 参数解析 ---
-param (
-    [Parameter(Mandatory=$false, HelpMessage="指定 API 提供商")]
-    [Alias("provider")]
-    [string]$p = "MEGREZ",
-
-    [Parameter(Mandatory=$false)]
-    [switch]$team,
-
-    [Parameter(Mandatory=$false)]
-    [switch]$auto
+param(
+    [Alias("p")]
+    [string]$Provider = "MEGREZ",
+    [switch]$Team,
+    [switch]$Auto
 )
 
-$CC_PROVIDER = $p.ToUpper()
+# --- Provider Configurations ---
+$Providers = @{
+    MEGREZ = @{
+        BaseUrl   = "https://enhance.megrez.plus/api/code"
+        Primary   = "code"
+        Secondary = "code"
+        Lite      = "code"
+        SubAgent  = "code"
+    }
+    OPENROUTER = @{
+        BaseUrl   = "https://openrouter.ai/api"
+        Primary   = "openai/gpt-oss-120b:free"
+        Secondary = "z-ai/glm-4.5-air:free"
+        Lite      = "minimax/minimax-m2.5:free"
+        SubAgent  = "minimax/minimax-m2.5:free"
+    }
+    POLARIS = @{
+        BaseUrl   = "http://localhost:11565"
+        Primary   = "code"
+        Secondary = "code"
+        Lite      = "code"
+        SubAgent  = "code"
+    }
+    OLLAMA = @{
+        BaseUrl   = "http://localhost:11434"
+        Primary   = "qwen3.5:2b"
+        Secondary = "qwen3.5:2b"
+        Lite      = "qwen3.5:2b"
+        SubAgent  = "qwen3.5:2b"
+    }
+    GLM = @{
+        BaseUrl   = "https://api.z.ai/api/anthropic"
+        Primary   = "GLM-5.1"
+        Secondary = "GLM-5.1"
+        Lite      = "GLM-4.7"
+        SubAgent  = "GLM-4.7"
+    }
+    KIMI = @{
+        BaseUrl   = "https://api.kimi.com/coding/"
+        Primary   = "kimi-for-coding"
+        Secondary = "kimi-for-coding"
+        Lite      = "kimi-for-coding"
+        SubAgent  = "kimi-for-coding"
+    }
+    MINIMAX = @{
+        BaseUrl   = "https://api.minimax.io/anthropic"
+        Primary   = "MiniMax-M2.1"
+        Secondary = "MiniMax-M2.1"
+        Lite      = "MiniMax-M2-Stable"
+        SubAgent  = "MiniMax-M2-Stable"
+    }
+    DEEPSEEK = @{
+        BaseUrl   = "https://api.deepseek.com/anthropic"
+        Primary   = "deepseek-chat"
+        Secondary = "deepseek-chat"
+        Lite      = "deepseek-chat"
+        SubAgent  = "deepseek-chat"
+    }
+    QWENCODE = @{
+        BaseUrl   = "https://dashscope.aliyuncs.com/apps/anthropic"
+        Primary   = "qwen3.5-plus"
+        Secondary = "qwen3.5-plus"
+        Lite      = "qwen3.5-plus"
+        SubAgent  = "qwen3.5-plus"
+    }
+    DOUBAO = @{
+        BaseUrl   = "https://ark.cn-beijing.volces.com/api/coding"
+        Primary   = "GLM-5.1"
+        Secondary = "doubao-seed-code-preview-latest"
+        Lite      = "doubao-seed-code-preview-latest"
+        SubAgent  = "doubao-seed-code-preview-latest"
+    }
+}
 
-# --- 验证提供商 ---
-if (-not $Providers.ContainsKey($CC_PROVIDER)) {
-    Write-Host "❌ 错误: 未知的提供商 '$CC_PROVIDER'" -ForegroundColor $Colors.Error
-    Write-Host "可用列表: $($Providers.Keys -join ', ')" -ForegroundColor $Colors.Warn
+# --- Validate Provider ---
+$Provider = $Provider.ToUpper()
+if (-not $Providers.ContainsKey($Provider)) {
+    Write-Host "Error: Unknown provider '$Provider'" -ForegroundColor Red
+    Write-Host "Usage: $($MyInvocation.MyCommand.Name) [-p PROVIDER] [-Team] [-Auto]"
+    Write-Host "Providers: $($Providers.Keys -join ', ')"
     exit 1
 }
 
-# --- 获取环境变量 ---
-$Config = $Providers[$CC_PROVIDER]
-$ApiKeyVar = "${CC_PROVIDER}_API_KEY"
-$ApiKey = [System.Environment]::GetEnvironmentVariable($ApiKeyVar, "User") 
-if (-not $ApiKey) { $ApiKey = $env:$ApiKeyVar } # 兼容当前会话变量
+$config = $Providers[$Provider]
 
-if (-not $ApiKey) {
-    Write-Host "`n[!] 缺少 API Key" -ForegroundColor $Colors.Error
-    Write-Host "请先设置环境变量: `$env:$ApiKeyVar = '你的秘钥'" -ForegroundColor $Colors.Warn
-    exit 1
-}
+# --- Set Environment Variables ---
+$env:ANTHROPIC_BASE_URL = $config.BaseUrl
+$env:ANTHROPIC_AUTH_TOKEN = [Environment]::GetEnvironmentVariable("${Provider}_API_KEY")
+$env:ANTHROPIC_API_KEY = ""
+$env:ANTHROPIC_DEFAULT_OPUS_MODEL = $config.Primary
+$env:ANTHROPIC_DEFAULT_SONNET_MODEL = $config.Secondary
+$env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $config.Lite
+$env:CLAUDE_CODE_SUBAGENT_MODEL = $config.SubAgent
 
-# --- 设置 Claude CLI 所需的环境变量 ---
-$env:ANTHROPIC_BASE_URL = $Config.BaseUrl
-$env:ANTHROPIC_AUTH_TOKEN = $ApiKey
-$env:ANTHROPIC_API_KEY = "" # 置空以绕过官方端点验证
-$env:ANTHROPIC_DEFAULT_OPUS_MODEL = $Config.Primary
-$env:ANTHROPIC_DEFAULT_SONNET_MODEL = $Config.Secondary
-$env:ANTHROPIC_DEFAULT_HAIKU_MODEL = $Config.Lite
-
-# 团队模式处理
-if ($team) {
+# --- Toggle Agent Teams ---
+if ($Team) {
     $env:CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1"
-    $TeamStatus = "已启用"
+    $teamStatus = "Enabled"
+    $teamColor = "Green"
 } else {
-    Remove-Item env:CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS -ErrorAction SilentlyContinue
-    $TeamStatus = "未启用"
+    Remove-Item Env:CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS -ErrorAction SilentlyContinue
+    $teamStatus = "Disabled"
+    $teamColor = "Yellow"
 }
 
-# 自动模式处理
-$ExtraArgs = @()
-if ($auto) {
-    $ExtraArgs += "--enable-auto-mode"
-    $AutoStatus = "已开启 (--enable-auto-mode)"
+# --- Auto Mode ---
+if ($Auto) {
+    $claudeArgs = @("--enable-auto-mode")
+    $autoStatus = "Enabled (Flag: --enable-auto-mode)"
+    $autoColor = "Green"
 } else {
-    $AutoStatus = "关闭"
+    $claudeArgs = @()
+    $autoStatus = "Disabled"
+    $autoColor = "Yellow"
 }
 
-# --- 状态展示界面 ---
-Write-Host "`n" + ("=" * 60) -ForegroundColor Blue
-Write-Host " 🚀 Claude CLI Wrapper (PowerShell Edition)" -ForegroundColor $Colors.Info
-Write-Host ("=" * 60) -ForegroundColor Blue
-
-Write-Host " 📍 提供商:    " -NoNewline; Write-Host $CC_PROVIDER -ForegroundColor $Colors.Success
-Write-Host " 👥 团队模式:  " -NoNewline; Write-Host $TeamStatus -ForegroundColor ($team ? $Colors.Success : $Colors.Error)
-Write-Host " 🤖 自动模式:  " -NoNewline; Write-Host $AutoStatus -ForegroundColor ($auto ? $Colors.Success : $Colors.Warn)
-Write-Host " 🌐 接口地址:  " -NoNewline; Write-Host $env:ANTHROPIC_BASE_URL -ForegroundColor $Colors.Accent
-
-if ($Config.Primary -eq $Config.Secondary) {
-    Write-Host " 📦 统一模型:  " -NoNewline; Write-Host $Config.Primary -ForegroundColor White
-} else {
-    Write-Host " 💎 Opus 层级: " -NoNewline; Write-Host $Config.Primary -ForegroundColor White
-    Write-Host " ⚡ Sonnet 层级:" -NoNewline; Write-Host $Config.Secondary -ForegroundColor White
+# --- API Key Check ---
+if ($Provider -notin @("OLLAMA", "POLARIS") -and [string]::IsNullOrEmpty($env:ANTHROPIC_AUTH_TOKEN)) {
+    Write-Host ""
+    Write-Host "[X] ERROR: API Key Not Found for $Provider" -ForegroundColor Red
+    Write-Host "Please set: `$env:${Provider}_API_KEY = `"your_key`"" -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
 }
-Write-Host ("=" * 60) + "`n" -ForegroundColor Blue
 
-# --- 启动 Claude ---
-& claude $ExtraArgs
+# --- Status Display ---
+Write-Host ""
+Write-Host "============================================================" -ForegroundColor Blue
+Write-Host "  Claude CLI Wrapper | Agent Status" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Blue
+Write-Host "Provider:      " -ForegroundColor Green -NoNewline; Write-Host $Provider -ForegroundColor Yellow
+Write-Host "Agent Teams:   " -ForegroundColor Green -NoNewline; Write-Host $teamStatus -ForegroundColor $teamColor
+Write-Host "Auto Mode:     " -ForegroundColor Green -NoNewline; Write-Host $autoStatus -ForegroundColor $autoColor
+Write-Host "Base URL:      " -ForegroundColor Green -NoNewline; Write-Host $env:ANTHROPIC_BASE_URL -ForegroundColor Magenta
+
+if ($config.Primary -eq $config.Secondary -and $config.Secondary -eq $config.Lite) {
+    Write-Host "Model Mode:    " -ForegroundColor Green -NoNewline; Write-Host "Unified ($($config.Secondary))" -ForegroundColor White
+} else {
+    Write-Host "Opus Model:    " -ForegroundColor Green -NoNewline; Write-Host $config.Primary -ForegroundColor White
+    Write-Host "Sonnet Model:  " -ForegroundColor Green -NoNewline; Write-Host $config.Secondary -ForegroundColor White
+    Write-Host "Haiku Model:   " -ForegroundColor Green -NoNewline; Write-Host $config.Lite -ForegroundColor White
+}
+Write-Host "============================================================" -ForegroundColor Blue
+Write-Host ""
+
+# --- Execute Claude CLI ---
+& claude @claudeArgs

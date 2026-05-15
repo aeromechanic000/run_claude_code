@@ -71,16 +71,16 @@ QWENCODE_SECONDARY_MODEL=qwen3.5-plus
 QWENCODE_LITE_MODEL=qwen3.5-plus
 QWENCODE_CODE_SUBAGENT_MODEL=qwen3.5-plus
 
-DOUBAO_BASE_URL=https://ark.cn-beijing.volces.com/api/coding
-DOUBAO_PRIMARY_MODEL=GLM-5.1
-DOUBAO_SECONDARY_MODEL=doubao-seed-code-preview-latest
-DOUBAO_LITE_MODEL=doubao-seed-code-preview-latest
-DOUBAO_CODE_SUBAGENT_MODEL=doubao-seed-code-preview-latest
+DOUBAOCODE_BASE_URL=https://ark.cn-beijing.volces.com/api/coding
+DOUBAOCODE_PRIMARY_MODEL=doubao-seed-code-preview-latest
+DOUBAOCODE_SECONDARY_MODEL=doubao-seed-code-preview-latest
+DOUBAOCODE_LITE_MODEL=doubao-seed-code-preview-latest
+DOUBAOCODE_CODE_SUBAGENT_MODEL=doubao-seed-code-preview-latest
 
 # --- Argument Parsing ---
 usage() {
     echo "Usage: $0 [-p PROVIDER] [--team] [--auto]"
-    echo "Providers: MEGREZ, POLARIS, OPENROUTER, OLLAMA, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAO"
+    echo "Providers: MEGREZ, POLARIS, OPENROUTER, OLLAMA, GLM, KIMI, QWENCODE, DEEPSEEK, MINIMAX, DOUBAOCODE"
     exit 1
 }
 
@@ -100,7 +100,7 @@ CC_PROVIDER=$(echo "$CC_PROVIDER" | tr '[:lower:]' '[:upper:]')
 
 # --- Validation & Env Setup ---
 case "$CC_PROVIDER" in
-    MEGREZ|POLARIS|OPENROUTER|OLLAMA|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAO) ;;
+    MEGREZ|POLARIS|OPENROUTER|OLLAMA|GLM|KIMI|QWENCODE|DEEPSEEK|MINIMAX|DOUBAOCODE) ;;
     *) echo -e "${RED}Error: Unknown provider '$CC_PROVIDER'${NC}"; usage ;;
 esac
 
@@ -111,6 +111,7 @@ SECONDARY_MODEL_VAR="${CC_PROVIDER}_SECONDARY_MODEL"
 LITE_MODEL_VAR="${CC_PROVIDER}_LITE_MODEL"
 SUBAGENT_MODEL_VAR="${CC_PROVIDER}_CODE_SUBAGENT_MODEL"
 
+export COLORTERM=truecolor
 export ANTHROPIC_BASE_URL=${!BASE_URL_VAR}
 export ANTHROPIC_AUTH_TOKEN=${!API_KEY_VAR}
 export ANTHROPIC_API_KEY=""
